@@ -25,16 +25,6 @@ export async function remove(request: APIRequestContext, id: number): Promise<vo
   });
 }
 
-export async function update(request: APIRequestContext, id: number, contact: TContactPayload): Promise<void> {
-  return test.step('Update contact', async () => {
-    const response = await request.post('/api/contacts/store', { data: { ...contact, id } });
-    const body = await response.json();
-    if (!body.status) {
-      throw new Error(`Failed to update contact: ${JSON.stringify(body)}`);
-    }
-  });
-}
-
 export async function verifyCreation(request: APIRequestContext, params: TVerifyCreationParams): Promise<void> {
   return test.step('Verify contact creation', async () => {
     expect(params.actualPayload).toEqual(params.expectedPayload);

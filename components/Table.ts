@@ -1,9 +1,4 @@
-import { type Locator, type Page, expect, test } from '@playwright/test';
-
-export type TColumnValue = {
-  column: string;
-  value: string;
-};
+import { type Locator, type Page, test } from '@playwright/test';
 
 export class Table {
   readonly page: Page;
@@ -12,10 +7,6 @@ export class Table {
   constructor(page: Page, root: Locator = page.locator('table')) {
     this.page = page;
     this.root = root;
-  }
-
-  row(text: string): Locator {
-    return this.root.locator('tbody tr').filter({ hasText: text });
   }
 
   rowByNumber(rowNumber: number): Locator {
@@ -36,21 +27,6 @@ export class Table {
       );
       const rowIndex = cellTexts.findIndex((text) => text === value);
       return rowIndex === -1 ? 0 : rowIndex + 1;
-    });
-  }
-
-  async validateRowValues(rowNumber: number, values: TColumnValue[]): Promise<void> {
-    return test.step(`Validate row ${rowNumber} values`, async () => {
-      const headers = await this.root.locator('thead th').allTextContents();
-      const row = this.rowByNumber(rowNumber);
-
-      for (const { column, value } of values) {
-        const columnIndex = headers.findIndex((header) => header.trim() === column);
-        if (columnIndex === -1) {
-          throw new Error(`Column "${column}" not found. Available columns: ${headers.join(', ')}`);
-        }
-        await expect(row.locator('td').nth(columnIndex)).toHaveText(value);
-      }
     });
   }
 }
