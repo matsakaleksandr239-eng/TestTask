@@ -4,15 +4,14 @@ Playwright + TypeScript test suite for `mcp.example-dev.com` (contacts managemen
 
 ## Status
 
-- **Contacts** (`tests/e2e/contacts.spec.ts`, `contact-add.spec.ts`, `contact-edit.spec.ts`) —
-  displaying the default Primary/Abuse contacts, creating/editing/deleting a custom contact,
-  checkbox state persistence, and field validation (required fields, special characters, email
+- **Contacts** (`contact-add.spec.ts`, `contact-edit.spec.ts`) — creating and editing a custom
+  contact, checkbox state, and field validation (required fields, special characters, email
   format, phone number rules).
 
-A few real product defects were found along the way and are left failing on purpose (`test.fixme`,
-with a comment explaining each) rather than worked around — full bug reports (steps to reproduce,
-expected/actual result, severity) are in [`bugs/`](./bugs), one file per defect, each linked from
-its `test.fixme` in `contact-add.spec.ts` and `contact-edit.spec.ts`.
+Some checks are left failing on purpose via `test.fixme` instead of being worked around: a few are
+known product defects, commented inline with what's wrong (e.g. the client accepting a
+trailing-dot email or a 5/6-digit phone number that the server later rejects); the rest are
+coverage not written yet (e.g. the page-text/label checks in `contact-edit.spec.ts`).
 
 ## Prerequisites
 
@@ -56,7 +55,7 @@ npm run report        # open the last HTML report
 npm run typecheck     # type-check the project without running anything
 
 # run a single file (the one-time login in `globalSetup` still runs first, automatically)
-npx playwright test --project=e2e tests/e2e/contacts.spec.ts
+npx playwright test --project=e2e tests/e2e/contact-add.spec.ts
 
 # run a single test by name (matches on the test title)
 npx playwright test --project=e2e -g "creates a new contact"
@@ -71,11 +70,7 @@ each test in the editor and in VS Code's Testing sidebar.
 **The whole suite runs with a single worker (`workers: 1` in `playwright.config.ts`).** All tests
 log in as the same one real account (there's no second test account to give each worker its own
 session), and concurrent requests sharing one logged-in session occasionally make the dev server
-respond with an error page instead of JSON — a single worker avoids that entirely. On top of that,
-the `Contacts` tests in `contacts.spec.ts` also opt into serial execution
-(`test.describe.configure({ mode: 'serial' })`) since they touch the shared contacts list —
-redundant under a single worker today, but it documents the constraint and keeps that file safe if
-parallelism is ever reintroduced (e.g. with a second test account).
+respond with an error page instead of JSON — a single worker avoids that entirely.
 
 ## Visual regression screenshots
 
@@ -98,7 +93,6 @@ utils/env.ts                   # typed, fail-fast environment config
 utils/matchers.ts               # asymmetric matcher for server timestamps (e.g. updated_at)
 
 tests/e2e/
-  contacts.spec.ts              # contacts list: default contacts, custom contact CRUD, pagination
   contact-add.spec.ts           # add-contact form: UI checks + field validation + creation
   contact-edit.spec.ts          # edit-contact form: same validation coverage + field updates
 
@@ -116,8 +110,6 @@ api/                             # direct API calls used for test setup/teardown
   contacts.ts, index.ts
 
 fixtures/fixturePages.ts        # wires Page Objects and API-backed fixtures into `test`
-
-bugs/                            # one bug report per defect found (repro steps, severity, etc.)
 ```
 
 Auth note: the app gates its routes on both a session cookie and a set of `auth.*` localStorage
