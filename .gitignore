@@ -1,0 +1,10 @@
+node_modules/
+test-results/
+.snapshots/
+playwright-report/
+playwright/.cache/
+blob-report/
+.auth/
+.env
+.env.*.local
+*.log
